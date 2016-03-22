@@ -6,3 +6,5 @@ function telnet_srv()
 		node.output(function(s) if c then c:send(s) end end)
 	end)
 end
+
+telnet_srv()
