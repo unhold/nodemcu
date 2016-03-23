@@ -1,0 +1,23 @@
+function init()
+	gpio.mode(7,gpio.FLOAT)
+	gpio.mode(7,gpio.OUTPUT)
+	gpio.write(3,0)
+	gpio.mode(8,gpio.FLOAT)
+end
+init()
+ok=pcall(dofile, "user.lua")
+if not ok then
+	init()
+	print("execution of user.lua failed")
+	print("module will sleep in 5 seconds")
+	print("enter anything to abort...")
+	tmr.alarm(0,5000,tmr.ALARM_SINGLE,function()
+		print("sleep")
+		node.dsleep(0)
+	end)
+	uart.on("data",0,function()
+		tmr.stop(0)
+		print("stop")
+		uart.on("data",0,nil)
+	end,1)
+end
