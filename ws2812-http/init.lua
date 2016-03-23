@@ -1,3 +1,5 @@
+gpio.mode(3,gpio.OUTPUT)
+gpio.write(3,0)
 gpio.mode(8,gpio.INPUT)
 tmr.alarm(0,5000,tmr.ALARM_SINGLE,function() dofile("user.lua") end)
 uart.on("data",0,function() tmr.stop(0) end,1)

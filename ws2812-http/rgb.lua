@@ -86,24 +86,59 @@ function rgb_num(num)
 	rgb_status(c:rep(20),10000)
 end
 
+httpOK="HTTP/1.1 200 OK\r\n\r\n"
+
+httpSlider=httpOK..[[
+<html>
+<body>
+<input type="range" min="0" max="360" value="60" onchange="setColorNumber(this)">
+<p id="status">move slider</p>
+<script>
+function setColorNumber(elem) {
+	var status=document.getElementById("status")
+	var xhp=new window.XMLHttpRequest()
+	xhp.open("POST","/slider",true)
+	xhp.setRequestHeader("color",elem.value)
+	xhp.onreadystatechange=function() {
+		if (xhp.readyState==4) {
+			if (xhp.status==200) status.innerHTML=xhp.responseText
+			else status.innerHTML="error "+xhp.status+": "+xhp.statusText
+		}
+	}
+	status.innerHTML="waiting for response..."
+	xhp.send()
+}
+</script>
+</body>
+</html>
+]]
+
 function rgb_srv()
 	srv=net.createServer(net.TCP)
-	srv:listen(80,function(con)
-		con:on("receive",function(c,p)
-			get=p:match("GET /.../%S*")
-			if get then
-				dir=get:sub(6,8)
-				arg=get:sub(10)
-				if dir=="str" then
-					rgb_str(arg)
-				elseif dir=="num" then
-					rgb_num(arg)
-				end
-				c:send(dir..": "..arg)
+	srv:listen(80,function(sk)
+		sk:on("receive",function(sk,dat)
+			if dat:match("^GET /slider ") then
+				sk:send(httpSlider)
+			elseif dat:match("^POST /slider ") then
+				local arg=dat:match("color: %d+")
+				if arg then rgb_num(arg:sub(8)) end
+				sk:send(httpOK.."color "..arg.." set")
 			else
-				c:send("HTTP/1.0 404")
+				get=dat:match("^GET /.../%S+")
+				if get then
+					local root=get:sub(6,8)
+					local arg=get:sub(10)
+					if root=="str" then
+						rgb_str(arg)
+					elseif root=="num" then
+						rgb_num(arg)
+					end
+					sk:send(httpOK..root.." "..arg.." set")
+				else
+					sk:send("HTTP/1.1 404 Not Found\r\n\r\nPage not found")
+				end
 			end
-			c:close()
+			sk:close()
 		end)
 	end)
 end
