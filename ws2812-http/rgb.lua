@@ -121,8 +121,13 @@ function rgb_srv()
 				sk:send(httpSlider)
 			elseif dat:match("^POST /slider ") then
 				local arg=dat:match("color: %d+")
-				if arg then rgb_num(arg:sub(8)) end
-				sk:send(httpOK.."color "..arg.." set")
+				if arg then
+					arg=arg:sub(8)
+					rgb_num(arg)
+					sk:send(httpOK.."color "..arg.." set")
+				else
+					sk:send("HTTP/1.1 400 Bad Request\r\n\r\nbad request")
+				end
 			else
 				get=dat:match("^GET /.../%S+")
 				if get then
@@ -135,7 +140,7 @@ function rgb_srv()
 					end
 					sk:send(httpOK..root.." "..arg.." set")
 				else
-					sk:send("HTTP/1.1 404 Not Found\r\n\r\nPage not found")
+					sk:send("HTTP/1.1 404 Not Found\r\n\r\npage not found")
 				end
 			end
 			sk:close()
