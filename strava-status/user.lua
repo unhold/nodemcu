@@ -1,8 +1,8 @@
 dofile("rgb.lc")
 dofile("strava.lc")
-rgb_setup(function()
-    strava(function() node.dsleep(2000000) end,
-           function() node.dsleep(2000000) end)
-end,function()
-    error(1)
-end)
+function done()
+	tmr.stop(0)
+	rgb_off()
+	node.dsleep(0)
+end
+rgb_setup(strava(done,done),done)

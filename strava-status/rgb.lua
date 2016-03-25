@@ -37,6 +37,7 @@ function rgb_on()
 end
 
 function rgb_off()
+	ws2812.write(DIN_PIN,RGB_OFF:rep(RGB_CNT))
 	gpio.mode(DIN_PIN,gpio.FLOAT)
 	gpio.mode(PSW_PIN,gpio.OUTPUT)
 	gpio.write(PSW_PIN,0)
@@ -44,7 +45,7 @@ end
 
 function rgb_status(color,timeout,done)
 	tmr.stop(0)
-	str=RGB_OFF:rep(RGB_CNT/2-2)..color:rep(2)..RGB_OFF:rep(RGB_CNT/2-2)
+	str=RGB_OFF:rep(4)..color:rep(2)..RGB_OFF:rep(RGB_CNT-6)
 	rgb_on()
 	ws2812.write(DIN_PIN,str)
 	timeout=timeout or 2000

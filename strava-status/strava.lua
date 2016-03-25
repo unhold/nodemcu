@@ -9,6 +9,9 @@ function strava(done,err)
 		local j=dat:sub(e+1):gsub("=>",": ")
 		local ok,table=pcall(cjson.decode, j)
 		if ok then
+			if j["recent_ride_totals"] then
+				j=j["recent_ride_totals"]
+			end
 			rgb_strava(table,done)
 		else
 			print("JSON decode failed")
