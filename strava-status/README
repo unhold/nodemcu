@@ -13,3 +13,9 @@ http://nodemcu-build.com/
 
 The Lua scripts and pre-build firmware is here:
 https://github.com/unhold/nodemcu/tree/master/strava-status
+
+The STRAVA API is used to get the activity summary info as JSON from a STRAVA account:
+http://strava.github.io/api/v3/athlete/#stats
+
+Because the ESP does not support TLS 1.2 but the STRAVA API demands it, Thingspeak ThingHTTP is used to give HTTP access. To avoid a security problem, only the activity summary is tunneld by ThingHTTP:
+https://thingspeak.com/apps/thinghttp
