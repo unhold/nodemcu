@@ -103,9 +103,9 @@ end
 
 RGB_STRAVA_FIELDS={
 	{"distance", 2000000, "m", false},
-	{"count", 40, "c", true},
+	{"count", 40, "c", false},
 	{"moving_time", 288000, "g", false},
-	{"achievement_count", 20, "y", true},
+	{"achievement_count", 20, "y", false},
 	{"elevation_gain", 20000, "r", false}}
 
 function rgb_strava(table,done,index)

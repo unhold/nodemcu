@@ -1,0 +1,15 @@
+STRAVA sports summary display
+Youtube video: https://youtu.be/bHk8gPNdcJg
+
+A display of my recent cycling activity, built into an IKEA picture frame: distance, number of rides, time, achievements, elevation gain.
+
+The electronics consists of an ESP8266 "ESP-03" WiFi module, WS2812 RGB LEDs, a DC/DC converter for the 3.3V of the ESP,  NFET to put LEDs to low power, reset button and 4 rechargeable AA batteries. The batteries will last a few months.
+
+The ESP8266 runs Lua via the NodeMCU firmware:
+http://www.lua.org/
+https://github.com/nodemcu/nodemcu-firmware
+http://nodemcu.readthedocs.org/en/dev/
+http://nodemcu-build.com/
+
+The Lua scripts and pre-build firmware is here:
+https://github.com/unhold/nodemcu/tree/master/strava-status
