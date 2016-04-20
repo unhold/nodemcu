@@ -1,3 +1,5 @@
+dofile("secret.lua")
+
 DHT_PIN=6
 DHT_SAMPLES=3
 DHT_PAUSE_MS=2000
@@ -70,7 +72,7 @@ function ts_update(temp,humi,nmes,vbat,cont)
     t["field4"]=mili_str(vbat)
     t["field5"]=rstc
     t["field6"]=node.heap()
-    local url="http://api.thingspeak.com/update?api_key=<your_key_here>"
+    local url="http://api.thingspeak.com/update?api_key="..THINGSPEAK_KEY
     for k,v in pairs(t) do
         url=url.."&"..k.."="..v
     end
@@ -86,7 +88,7 @@ function ts_update(temp,humi,nmes,vbat,cont)
 end
 
 function ifttt_warn(cont)
-    url="http://maker.ifttt.com/trigger/esp_battery_low/with/key/<your_key_here>"
+    url="http://maker.ifttt.com/trigger/esp_battery_low/with/key/"..IFTTT_KEY
     print("HTTP GET "..url)
     http.get(url,nil,function(s)
         if s==200 then
