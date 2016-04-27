@@ -3,10 +3,10 @@ dofile("secret.lua")
 DHT_PIN=6
 DHT_SAMPLES=3
 DHT_PAUSE_MS=2000
+DHT_SLEEP_US=598000000
 TEMP_OFF=0
 HUMI_OFF=0
 VBAT_OFF=-200
-rst=true
 
 function mili_str(n)
     return string.format("%d.%03d",n/1000,n%1000)
@@ -29,16 +29,16 @@ function med_avg(tbl)
     return tbl[(#tbl+1)/2]--
 end
 
-function dht_measure(cont)
+function dht_measure_multiple(cont)
     local samples=DHT_SAMPLES
     local temp={}
     local humi={}
     local vbat={}
     tmr.alarm(0,DHT_PAUSE_MS,tmr.ALARM_AUTO,function()
-    	local v=adc.readvdd33()
+    	local v=adc.readvdd33()+VBAT_OFF
         local s,t0,h0,t1,h1=dht.read(DHT_PIN)
-        local t=1000*t0+t1
-        local h=1000*h0+h1
+        local t=1000*t0+t1+TEMP_OFF
+        local h=1000*h0+h1+HUMI_OFF
         print("#"..samples.." err"..s.." "..mili_str(t).."°C "..mili_str(h).."% "..mili_str(v).."V")
         table.insert(vbat,v)
         if s==dht.OK then
@@ -49,22 +49,29 @@ function dht_measure(cont)
         if samples==0 then
             tmr.stop(0)
             local t=med_avg(temp)
-            if t then t=t+TEMP_OFF end
             local h=med_avg(humi)
-            if h then h=h+HUMI_OFF end
             local v=med_avg(vbat)
-            if v then v=v+VBAT_OFF end
             cont(t,h,#temp,v)
         end
     end)
 end
 
-function ts_update(temp,humi,nmes,vbat,cont)
-    local rstc=-1
-    if rst then
-        rst=false
-        _,rstc=node.bootreason()
+function dht_measure_once(cont)
+    local v=adc.readvdd33()+VBAT_OFF
+    local s,t0,h0,t1,h1=dht.read(DHT_PIN)
+    local t=1000*t0+t1+TEMP_OFF
+    local h=1000*h0+h1+HUMI_OFF
+    local n=1
+    print("err"..s.." "..mili_str(t).."°C "..mili_str(h).."% "..mili_str(v).."V")
+    if s~=dht.OK then
+        t=nil
+        h=nil
+        n=0
     end
+    cont(t,h,n,v)
+end
+
+function ts_update(temp,humi,nmes,vbat,cont)
     local t={}
     if temp then t["field1"]=mili_str(temp) end
     if humi then t["field2"]=mili_str(humi) end
@@ -103,15 +110,25 @@ end
 function app()
     if adc.readvdd33()+VBAT_OFF<2800 then low_bat=true end
     if low_bat then ifttt_warn(nil) end
-    dht_measure(function(temp,humi,nmes,vbat)
+    dht_measure_once(function(temp,humi,nmes,vbat)
         ts_update(temp,humi,nmes,vbat,function()
             if low_bat then
                 node.dsleep(0)
             elseif not stop then
-                node.dsleep(293500000)
+                node.dsleep(DHT_SLEEP_US)
             end
         end)
     end)
 end
 
-app()
+rst=true
+rstc=-1
+if rst then
+    rst=false
+    _,rstc=node.bootreason()
+end
+if rstc==0 or rstc==6 then
+    tmr.alarm(0,DHT_PAUSE_MS,tmr.ALARM_SINGLE,app)
+else
+    app()
+end
