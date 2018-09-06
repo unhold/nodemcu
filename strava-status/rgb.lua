@@ -75,10 +75,8 @@ function rgb_bar(color,eights,reverse)
 	local str=color:rep(eights/8)
 	if eights%8~=0 then
 		str=str..rgb_color_scale(color,eights%8)
-	else
-		str=str..RGB_OFF
 	end
-	str=str..RGB_OFF:rep(RGB_CNT-eights/8-1)
+	str=str..RGB_OFF:rep(3*RGB_CNT-str:len())
 	if reverse then str=str:reverse() end
 	rgb_on()
 	ws2812.write(DIN_PIN,str)
@@ -116,6 +114,7 @@ function rgb_strava(table,done,index)
 	end
 	local name,max,color,reverse=unpack(RGB_STRAVA_FIELDS[index])
 	local value=table[name] or 0
+	if value>max then value=max end
 	value=value*160/max
 	if value==0 then value=1 end
 	print(name..": "..value)
